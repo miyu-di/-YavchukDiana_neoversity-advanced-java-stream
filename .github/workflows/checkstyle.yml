@@ -1,0 +1,60 @@
+name: Java CI with Maven & Checkstyle
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Add upstream remote (original repo)
+        run: |
+          git remote add upstream https://github.com/alex97po/neoversity-advanced-java-stream.git
+          git fetch upstream main
+
+      - name: Validate only Assignments.java changed
+        run: |
+          CHANGED_FILES=$(git diff --name-only upstream/main HEAD)
+          echo "Changed files compared to original template:"
+          echo "$CHANGED_FILES"
+          ALLOWED_FILE="src/main/java/com/neoversity/Assignments.java"
+          for f in $CHANGED_FILES; do
+            if [ "$f" != "$ALLOWED_FILE" ]; then
+              echo "❌ Modification of '$f' is not allowed!"
+              exit 1
+            fi
+          done
+          echo "✅ Only allowed file modified compared to upstream main"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Compile project
+        run: mvn clean test-compile
+
+      - name: Run Task 1 tests
+        run: mvn -Dtest=Task1Test test
+
+      - name: Run Task 2 tests
+        run: mvn -Dtest=Task2Test test
+
+      - name: Run Task 3 tests
+        run: mvn -Dtest=Task3Test test
+
+      - name: Run Task 4 tests
+        run: mvn -Dtest=Task4Test test
+
+      - name: Run Task 5 tests
+        run: mvn -Dtest=Task5Test test
